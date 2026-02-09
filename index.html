@@ -1,345 +1,372 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waste CSI: Follow the Trash – Enhanced</title>
-    <style>
-        /* Your original styles here – unchanged for familiarity */
-        body { font-family: 'Arial', sans-serif; background: linear-gradient(135deg, #1a3c34, #2e5c4d); color: #fff; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow: hidden; }
-        .header { text-align: center; padding: 20px; background: rgba(0,0,0,0.7); width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .header h1 { margin: 0; font-size: 2.5em; color: #ffcc00; text-shadow: 0 0 10px #ffcc00; }
-        .header p { margin: 5px 0 0; font-size: 1.1em; opacity: 0.9; }
-        .container { max-width: 1000px; width: 100%; padding: 20px; display: flex; flex-direction: column; gap: 30px; }
-        .section { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); transition: transform 0.3s ease; }
-        .section:hover { transform: translateY(-5px); }
-        .scene-title { font-size: 1.6em; margin-bottom: 15px; color: #ffcc00; display: flex; align-items: center; gap: 10px; }
-        .waste-bin { background: #333; border: 4px solid #666; border-radius: 20px; padding: 20px; text-align: center; min-height: 200px; display: flex; flex-direction: column; justify-content: center; position: relative; }
-        .bin-label { font-size: 1.2em; margin-bottom: 15px; font-weight: bold; }
-        .items { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
-        .waste-item { background: #444; border-radius: 12px; padding: 15px 20px; cursor: grab; user-select: none; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 10px; font-size: 1.1em; }
-        .waste-item:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(255,204,0,0.4); }
-        .waste-item:active { cursor: grabbing; }
-        .bins { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 15px; margin-top: 20px; }
-        .bin { background: #222; border: 5px solid #555; border-radius: 15px; padding: 15px; text-align: center; min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: border-color 0.3s, background 0.3s; position: relative; cursor: pointer; }
-        .bin:hover { border-color: #ffcc00; background: #2a2a2a; }
-        .bin.correct { border-color: #4caf50; background: rgba(76,175,80,0.2); }
-        .bin.wrong { border-color: #f44336; background: rgba(244,67,54,0.2); }
-        .bin-icon { font-size: 3em; margin-bottom: 10px; }
-        .bin-name { font-weight: bold; margin-bottom: 5px; }
-        .bin-desc { font-size: 0.9em; opacity: 0.8; }
-        .feedback { margin-top: 15px; font-size: 1.1em; font-weight: bold; min-height: 1.5em; }
-        .emissions { font-size: 1.3em; text-align: center; margin: 10px 0; }
-        .meter { height: 20px; background: #333; border-radius: 10px; overflow: hidden; margin: 10px 0; }
-        .meter-bar { height: 100%; background: linear-gradient(to right, #4caf50, #ffcc00, #f44336); transition: width 0.6s ease; }
-        .journey { display: none; flex-direction: column; align-items: center; }
-        .journey-map { display: flex; align-items: center; gap: 30px; margin: 20px 0; position: relative; flex-wrap: wrap; justify-content: center; }
-        .journey-step { text-align: center; width: 120px; }
-        .journey-step .icon { font-size: 4em; margin-bottom: 8px; }
-        .journey-step .label { font-size: 1.1em; font-weight: bold; }
-        .journey-step .arrow { font-size: 2.5em; color: #ffcc00; margin-top: -15px; }
-        .stats { background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; margin-top: 20px; width: 100%; }
-        .stats h3 { color: #ffcc00; margin-bottom: 10px; }
-        .stats ul { list-style: none; padding: 0; }
-        .stats li { margin: 8px 0; font-size: 1.1em; }
-        button { background: #ffcc00; color: #1a3c34; border: none; padding: 14px 32px; font-size: 1.2em; font-weight: bold; border-radius: 50px; cursor: pointer; transition: all 0.3s; box-shadow: 0 6px 15px rgba(255,204,0,0.4); margin: 10px; }
-        button:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(255,204,0,0.6); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .reset { background: #666; color: #fff; }
-        .transport-stage, .disposal-stage { margin: 20px 0; text-align: center; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; width: 80%; }
-        #improvements-section .applied { color: #4caf50; font-weight: bold; animation: fadeIn 1s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .footer { margin-top: auto; padding: 15px; font-size: 0.9em; opacity: 0.7; text-align: center; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Waste CSI: Follow the Trash</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg-start: #060d0c;
+      --bg-end: #0f1f1c;
+      --card: rgba(15, 30, 28, 0.9);
+      --border: rgba(52, 211, 153, 0.2);
+      --green: #34d399;
+      --red: #f87171;
+      --yellow: #fbbf24;
+    }
+    body {
+      background: radial-gradient(circle at center, var(--bg-end), var(--bg-start));
+      color: #f3f4f6;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .glass-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .item-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: grab;
+      transition: all 0.2s ease;
+    }
+    .item-box:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-3px);
+      border-color: var(--green);
+    }
+    .bin-box {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-width: 2px;
+    }
+    .bin-box.drag-over {
+      transform: scale(1.05);
+      background: rgba(52, 211, 153, 0.1) !important;
+      border-color: var(--green) !important;
+    }
+    .progress-fill {
+      transition: width 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+    .btn-action {
+      background: linear-gradient(135deg, #10b981, #059669);
+      transition: all 0.3s;
+    }
+    .btn-action:hover:not(:disabled) {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);
+    }
+  </style>
 </head>
-<body>
-    <div class="header">
-        <h1>🚨 Waste CSI: Follow the Trash</h1>
-        <p>Interactive Simulation • Scope 3 Waste Reduction • ISS 2024</p>
-    </div>
+<body class="min-h-screen p-6">
+  <div class="max-w-6xl mx-auto space-y-12">
 
-    <div class="container">
-        <!-- Scene 1: Sorting (unchanged core) -->
-        <div class="section" id="sorting-section">
-            <div class="scene-title"><span>🔍 Scene 1: The Waste Bin at Site</span></div>
-            <div class="waste-bin">
-                <div class="bin-label">🗑️ ISS Waste Bin (Mixed Waste)</div>
-                <div class="items" id="items"></div>
-            </div>
-            <div class="bins" id="bins"></div>
-            <div class="feedback" id="feedback"></div>
-            <div class="emissions">
-                <strong>Current Contamination Impact:</strong> <span id="contamination">0%</span>
-                <div class="meter"><div class="meter-bar" id="meter-bar" style="width:0%"></div></div>
-                <span id="emissions-value">+0 tCO₂e (no extra emissions yet)</span>
-            </div>
-            <button id="nextBtn" onclick="nextScene()" disabled>Follow the Trash →</button>
-            <button class="reset" onclick="resetSimulation()">Reset</button>
+    <header class="text-center py-10">
+      <h1 class="text-6xl font-black tracking-tighter mb-4 text-white">Waste CSI: <span class="text-emerald-500">Follow the Trash</span></h1>
+      <p class="text-xl text-gray-400">Investigating Scope 3 emissions at ISS</p>
+    </header>
+
+    <section id="sorting-section" class="glass-card p-10">
+      <div class="flex items-center gap-4 mb-8">
+        <span class="text-3xl">🔍</span>
+        <h2 class="text-3xl font-bold">Scene 1: The Waste Bin at Site</h2>
+      </div>
+
+      <div class="flex gap-4 mb-10">
+        <button onclick="toggleBinStyle('old')" class="px-6 py-3 rounded-xl bg-gray-800 font-bold hover:bg-gray-700 transition">Old Inconsistent Bins</button>
+        <button onclick="toggleBinStyle('standard')" class="px-6 py-3 rounded-xl bg-emerald-900/50 border border-emerald-500/50 font-bold hover:bg-emerald-800 transition">Standardised Bins</button>
+      </div>
+
+      <div class="bg-black/40 rounded-3xl p-8 mb-10 border border-white/5">
+        <h3 class="text-xs uppercase font-black text-emerald-500 tracking-widest mb-6">🗑️ ISS Mixed Waste Bin (Unsorted)</h3>
+        <div id="items" class="flex flex-wrap gap-4 justify-center min-h-[120px]">
+          </div>
+      </div>
+
+      <div id="bins" class="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10">
         </div>
 
-        <!-- Scene 2: Journey (enhanced with transport & disposal) -->
-        <div class="section journey" id="journey-section">
-            <div class="scene-title"><span>🚚 Scene 2: Follow the Trash</span></div>
-            <div class="journey-map">
-                <div class="journey-step"><div class="icon">🗑️</div><div class="label">Bin</div></div>
-                <div class="journey-step"><div class="icon">➡️</div></div>
-                <div class="journey-step"><div class="icon">🚚</div><div class="label">Truck</div></div>
-                <div class="journey-step"><div class="icon">➡️</div></div>
-                <div class="journey-step"><div class="icon" id="facility-icon">🔥</div><div class="label" id="facility-label">Incinerator</div></div>
-            </div>
+      <button onclick="activateSignage()" class="flex items-center gap-3 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition mb-8 font-bold">
+        <span>🖼️</span> Activate Signage
+      </button>
 
-            <div class="transport-stage">
-                <h3>Transport Stage: Collection & Hauling</h3>
-                <p>Contamination: <span id="contam-level">0%</span></p>
-                <button onclick="simulateTransport()">Simulate Truck Journey</button>
-                <div id="transport-result" style="margin-top:15px; font-size:1.2em; min-height:50px;"></div>
-            </div>
+      <div id="feedback" class="p-6 bg-black/20 rounded-2xl text-center text-xl font-medium min-h-[80px] border border-white/5 text-gray-400 italic flex items-center justify-center">
+        Analyze the trash and drag items to the correct bin...
+      </div>
 
-            <div class="disposal-stage">
-                <h3>Final Disposal</h3>
-                <div id="disposal-result" style="font-size:1.3em; min-height:50px;"></div>
-            </div>
-
-            <div class="stats">
-                <h3>📊 Emissions Outcome (Your Sorting)</h3>
-                <ul id="outcome-list"></ul>
-            </div>
-            <div class="emissions" style="margin-top:20px;">
-                <strong>Total Extra Emissions:</strong> <span id="total-emissions">+0 tCO₂e</span>
-            </div>
-            <button onclick="showImprovements()">See After Improvements →</button>
+      <div class="mt-12 space-y-6">
+        <div class="flex justify-between font-bold text-xl">
+          <span>Contamination Level: <span id="contamination" class="text-emerald-400">0%</span></span>
+          <span id="emissions-value" class="text-gray-400">+0 tCO₂e extra emissions</span>
         </div>
-
-        <!-- Scene 3: After Improvements (enhanced) -->
-        <div class="section" id="improvements-section" style="display:none;">
-            <div class="scene-title"><span>✅ After: Mandatory Changes (Your Proposal)</span></div>
-            <div style="display:flex; gap:40px; align-items:flex-start; flex-wrap:wrap;">
-                <div style="flex:1;">
-                    <h3 style="color:#4caf50;">Improvements Implemented</h3>
-                    <ul style="list-style:none; padding:0;">
-                        <li style="margin:12px 0; display:flex; align-items:center; gap:10px;"><span style="font-size:1.5em;">📍</span> Mandatory bin standardisation</li>
-                        <li style="margin:12px 0; display:flex; align-items:center; gap:10px;"><span style="font-size:1.5em;">🖼️</span> Clear visual signage</li>
-                        <li style="margin:12px 0; display:flex; align-items:center; gap:10px;"><span style="font-size:1.5em;">🍎</span> Food waste separation for composting</li>
-                        <li style="margin:12px 0; display:flex; align-items:center; gap:10px;"><span style="font-size:1.5em;">📋</span> Monthly waste audits (KPI: contamination rate)</li>
-                    </ul>
-                    <button onclick="applyImprovements()">Apply Changes & Recalculate</button>
-                </div>
-                <div style="flex:1;">
-                    <h3 style="color:#4caf50;">📉 Emissions Reduced</h3>
-                    <div id="reduction-display" style="font-size:2.5em; font-weight:bold; color:#4caf50; text-align:center; margin:30px 0; opacity:0; transition:opacity 1s;">
-                        -205 tCO₂e
-                    </div>
-                    <p style="text-align:center; font-size:1.2em; opacity:0.9;">
-                        (Medium scenario: 30% reduction from 684.3 tCO₂e baseline)
-                    </p>
-                    <p style="text-align:center; font-size:1em; opacity:0.8;">
-                        New contamination rate: <strong>10%</strong> (down from up to 100%)
-                    </p>
-                </div>
-            </div>
-            <button onclick="restartSimulation()">Restart Simulation</button>
-            <p style="text-align:center; margin-top:20px; font-size:0.95em; opacity:0.7;">
-                Great for video demo – show mistakes → penalties → improvements payoff!
-            </p>
+        <div class="h-4 bg-black/50 rounded-full overflow-hidden border border-white/10">
+          <div id="meter-bar" class="progress-fill w-0 h-full bg-gradient-to-r from-emerald-500 via-yellow-500 to-red-500"></div>
         </div>
-    </div>
+      </div>
 
-    <div class="footer">
-        Built for ISS Scope 3 Waste CSI • 2024 Data • Medium Impact Scenario
-    </div>
+      <div class="flex justify-center gap-6 mt-16">
+        <button id="nextBtn" disabled class="btn-action px-12 py-5 rounded-2xl text-2xl font-black text-white disabled:opacity-20 uppercase tracking-widest">
+          Follow the Trash →
+        </button>
+        <button onclick="location.reload()" class="px-10 py-5 bg-gray-800 rounded-2xl text-2xl font-bold hover:bg-gray-700 transition">Reset</button>
+      </div>
+    </section>
 
-    <script>
-        // Data (you can add more items easily)
-        const wasteItems = [
-            { id: 1, name: "🍎 Food Scrap", type: "food", icon: "🍎", emissions: 1.8, correctBin: "compost" },
-            { id: 2, name: "🛍️ Plastic Bottle", type: "recyclable", icon: "🛍️", emissions: 0.9, correctBin: "recycling" },
-            { id: 3, name: "📄 Paper Cup", type: "recyclable", icon: "📄", emissions: 0.4, correctBin: "recycling" },
-            { id: 4, name: "🗑️ Contaminated Mixed", type: "mixed", icon: "🗑️", emissions: 3.2, correctBin: "general" }
-            // Optional: add more, e.g. { id: 5, name: "🔋 Battery", emissions: 2.5, correctBin: "general" }
-        ];
+    <section id="journey-section" class="hidden glass-card p-10">
+      <h2 class="text-4xl font-black mb-10 flex items-center gap-4"><span>🚚</span> Scene 2: Journey Analysis</h2>
+      
+      <div class="flex flex-wrap justify-center gap-12 items-center p-12 bg-black/30 rounded-3xl border border-white/5 mb-12">
+        <div class="text-center"><div class="text-8xl mb-2">🗑️</div><p class="font-black text-gray-500">BIN</p></div>
+        <div class="text-4xl text-yellow-500">→</div>
+        <div class="text-center"><div class="text-8xl mb-2">🚚</div><p class="font-black text-gray-500">TRUCK</p></div>
+        <div class="text-4xl text-yellow-500">→</div>
+        <div class="text-center"><div id="facility-icon" class="text-8xl mb-2">🔥</div><p id="facility-label" class="font-black text-gray-500 uppercase">Facility</p></div>
+      </div>
 
-        const bins = [
-            { id: "compost", name: "Compost Bin", icon: "🌱", desc: "Food → Digestion (low emissions)", color: "#4caf50" },
-            { id: "recycling", name: "Recycling Bin", icon: "♻️", desc: "Plastics/Paper → Recycled (low)", color: "#2196f3" },
-            { id: "general", name: "General Waste", icon: "🔥", desc: "Mixed → Incineration (HIGH)", color: "#f44336" }
-        ];
+      <div class="grid md:grid-cols-2 gap-8 mb-12">
+        <div class="p-8 bg-black/40 rounded-2xl border border-white/5">
+          <h3 class="text-2xl font-bold mb-4 text-yellow-500">Transport Investigation</h3>
+          <p class="text-lg mb-6 text-gray-400">Current Contamination: <span id="contam-level" class="text-white font-bold">0%</span></p>
+          <button onclick="simulateTransport()" class="w-full py-4 bg-yellow-600 font-black rounded-xl hover:bg-yellow-500 transition uppercase tracking-widest">Simulate Journey</button>
+          <div id="transport-result" class="mt-6 text-lg min-h-[120px]"></div>
+        </div>
+        <div class="p-8 bg-black/40 rounded-2xl border border-white/5">
+          <h3 class="text-2xl font-bold mb-4 text-emerald-500">Final Disposal</h3>
+          <div id="disposal-result" class="text-lg min-h-[120px]">Waiting for simulation...</div>
+        </div>
+      </div>
 
-        let sortedItems = [];
-        let contamination = 0;
-        let totalExtraEmissions = 0;
-        let itemsLeft = wasteItems.length;  // New: track if all sorted
+      <div class="p-8 bg-black/20 rounded-2xl mb-12">
+        <h3 class="text-xl font-bold mb-6 text-gray-500 uppercase tracking-widest">Sorting Report</h3>
+        <ul id="outcome-list" class="space-y-4"></ul>
+      </div>
 
-        function populateItems() {
-            const container = document.getElementById('items');
-            container.innerHTML = '';
-            wasteItems.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'waste-item';
-                div.draggable = true;
-                div.dataset.id = item.id;
-                div.innerHTML = `<span>${item.icon}</span><span>${item.name}</span>`;
-                div.addEventListener('dragstart', dragStart);
-                container.appendChild(div);
-            });
-            itemsLeft = wasteItems.length;
-            document.getElementById('nextBtn').disabled = true;
+      <div class="text-center">
+        <div id="total-emissions" class="text-5xl font-black mb-12">Total Extra: +0 tCO₂e</div>
+        <button onclick="showImprovements()" class="btn-action px-12 py-6 rounded-2xl text-2xl font-black text-white uppercase tracking-widest">See After Improvements →</button>
+      </div>
+    </section>
+
+    <section id="improvements-section" class="hidden space-y-12">
+      <div class="text-center">
+        <h2 class="text-6xl font-black text-emerald-400 mb-4">Impact of Better Practices</h2>
+        <p class="text-xl text-gray-400">Transforming the waste stream into a carbon asset.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="glass-card p-12 text-center">
+          <div id="reduction-display" class="text-9xl font-black text-emerald-500 opacity-0 transition-all duration-1000 scale-75">-205</div>
+          <p class="text-2xl font-bold mt-4 uppercase">tCO₂e Reduced Annually</p>
+        </div>
+        <div class="glass-card p-12 text-center">
+          <div class="text-9xl font-black text-white">10%</div>
+          <p class="text-2xl font-bold mt-4 uppercase">Target Contamination Rate</p>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button onclick="applyImprovements()" class="btn-action px-16 py-8 rounded-2xl text-3xl font-black text-white uppercase">Apply Changes & Show Impact</button>
+      </div>
+
+      <div class="grid md:grid-cols-4 gap-6">
+        <div class="glass-card p-6 text-center bg-emerald-500/5">
+          <div class="text-4xl mb-3">📍</div>
+          <h4 class="font-bold mb-2">Bin Standardisation</h4>
+          <p class="text-xs text-gray-500">Uniform systems across sites.</p>
+        </div>
+        <div class="glass-card p-6 text-center bg-emerald-500/5">
+          <div class="text-4xl mb-3">🖼️</div>
+          <h4 class="font-bold mb-2">Better Signage</h4>
+          <p class="text-xs text-gray-500">Visual sorting guides.</p>
+        </div>
+        <div class="glass-card p-6 text-center bg-emerald-500/5">
+          <div class="text-4xl mb-3">🍎</div>
+          <h4 class="font-bold mb-2">Food Separation</h4>
+          <p class="text-xs text-gray-500">Preventing organic methane.</p>
+        </div>
+        <div class="glass-card p-6 text-center bg-emerald-500/5">
+          <div class="text-4xl mb-3">📋</div>
+          <h4 class="font-bold mb-2">Monthly Audits</h4>
+          <p class="text-xs text-gray-500">KPI tracking and fixes.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // YOUR ORIGINAL DATA
+    const wasteItems = [
+      { id: 1, name: "Food Scrap", icon: "🍎", emissions: 1.8, correctBin: "compost" },
+      { id: 2, name: "Plastic Bottle", icon: "🛍️", emissions: 0.9, correctBin: "recycling" },
+      { id: 3, name: "Paper Cup", icon: "📄", emissions: 0.4, correctBin: "recycling" },
+      { id: 4, name: "Contaminated Mixed", icon: "🗑️", emissions: 3.2, correctBin: "general" },
+    ];
+
+    const bins = [
+      { id: "compost", name: "Compost 🌱" },
+      { id: "recycling", name: "Recycling ♻️" },
+      { id: "general", name: "General 🔥" },
+    ];
+
+    let sortedItems = [];
+    let contamination = 0;
+    let totalExtraEmissions = 0;
+    let itemsLeft = wasteItems.length;
+    let binStyle = "old";
+    let signageActive = false;
+
+    function $(id) { return document.getElementById(id); }
+
+    function populateItems() {
+      const cont = $("items");
+      cont.innerHTML = "";
+      wasteItems.forEach(item => {
+        const el = document.createElement("div");
+        el.className = "item-box px-8 py-5 rounded-2xl flex items-center gap-4 text-xl font-bold shadow-xl border border-white/10";
+        el.draggable = true;
+        el.dataset.id = item.id;
+        el.innerHTML = `<span class="text-4xl">${item.icon}</span> ${item.name}`;
+        el.addEventListener("dragstart", e => e.dataTransfer.setData("text/plain", item.id));
+        cont.appendChild(el);
+      });
+    }
+
+    function populateBins() {
+      const cont = $("bins");
+      cont.innerHTML = "";
+      bins.forEach(bin => {
+        const el = document.createElement("div");
+        el.className = "bin-box p-12 rounded-3xl bg-black/40 text-center shadow-xl text-7xl font-bold border border-white/5";
+        el.dataset.id = bin.id;
+        el.innerHTML = bin.name.split(" ")[1] || "♻️";
+        
+        if (binStyle === "old") {
+          el.style.backgroundColor = `hsl(${Math.random() * 360}, 20%, 20%)`;
+        } else {
+          el.style.borderColor = "rgba(16, 185, 129, 0.3)";
+          el.style.backgroundColor = "rgba(16, 185, 129, 0.05)";
         }
 
-        function populateBins() {
-            const container = document.getElementById('bins');
-            container.innerHTML = '';
-            bins.forEach(bin => {
-                const div = document.createElement('div');
-                div.className = 'bin';
-                div.dataset.id = bin.id;
-                div.innerHTML = `<div class="bin-icon">${bin.icon}</div><div class="bin-name">${bin.name}</div><div class="bin-desc">${bin.desc}</div>`;
-                div.addEventListener('dragover', dragOver);
-                div.addEventListener('drop', drop);
-                container.appendChild(div);
-            });
-        }
+        el.addEventListener("dragover", e => {
+          e.preventDefault();
+          el.classList.add("drag-over");
+        });
+        el.addEventListener("dragleave", () => el.classList.remove("drag-over"));
+        el.addEventListener("drop", drop);
+        cont.appendChild(el);
+      });
+    }
 
-        function dragStart(e) { e.dataTransfer.setData('text/plain', e.target.dataset.id); }
+    function toggleBinStyle(style) {
+      binStyle = style;
+      populateBins();
+      if (style === "standard") {
+        contamination = Math.max(0, contamination - 10);
+        updateUI();
+      }
+    }
 
-        function dragOver(e) { e.preventDefault(); }
+    function activateSignage() {
+      signageActive = true;
+      contamination = Math.max(0, contamination - 10);
+      updateUI();
+      $("feedback").innerHTML = "<span class='text-emerald-400 font-bold'>Signage Active: Sorting intelligence increased!</span>";
+    }
 
-        function drop(e) {
-            e.preventDefault();
-            const itemId = parseInt(e.dataTransfer.getData('text/plain'));
-            const item = wasteItems.find(i => i.id === itemId);
-            if (!item) return;
-            const binId = e.currentTarget.dataset.id;
-            const isCorrect = item.correctBin === binId;
+    function drop(e) {
+      e.preventDefault();
+      const binEl = e.currentTarget;
+      binEl.classList.remove("drag-over");
+      
+      const id = parseInt(e.dataTransfer.getData("text/plain"));
+      const item = wasteItems.find(i => i.id === id);
+      const binId = binEl.dataset.id;
+      
+      let isCorrect = item.correctBin === binId;
+      if (signageActive && !isCorrect) {
+        isCorrect = Math.random() > 0.5;
+      }
 
-            const itemEl = document.querySelector(`.waste-item[data-id="${itemId}"]`);
-            if (itemEl) itemEl.remove();
-            itemsLeft--;
+      document.querySelector(`[data-id="${id}"]`)?.remove();
+      itemsLeft--;
 
-            e.currentTarget.classList.add(isCorrect ? 'correct' : 'wrong');
-            setTimeout(() => e.currentTarget.classList.remove(isCorrect ? 'correct' : 'wrong'), 800);
+      if (isCorrect) {
+        binEl.style.borderColor = "#34d399";
+        $("feedback").innerHTML = `<span class='text-emerald-400 font-bold'>Correct!</span> ${item.name} is handled properly.`;
+      } else {
+        binEl.style.borderColor = "#f87171";
+        contamination = Math.min(100, contamination + 25);
+        totalExtraEmissions += item.emissions;
+        $("feedback").innerHTML = `<span class='text-red-400 font-bold'>Wrong!</span> ${item.name} contaminated the ${binId} bin.`;
+      }
 
-            if (isCorrect) {
-                document.getElementById('feedback').innerHTML = `✅ Great! ${item.name} correctly sorted.`;
-                document.getElementById('feedback').style.color = '#4caf50';
-            } else {
-                document.getElementById('feedback').innerHTML = `❌ Wrong! ${item.name} → ${bins.find(b => b.id === binId).name} (adds contamination!)`;
-                document.getElementById('feedback').style.color = '#f44336';
-                contamination += 25;
-                totalExtraEmissions += item.emissions;
-            }
+      sortedItems.push({ item, binId, isCorrect });
+      updateUI();
 
-            document.getElementById('meter-bar').style.width = Math.min(contamination, 100) + '%';
-            document.getElementById('contamination').textContent = contamination + '%';
+      if (itemsLeft <= 0) {
+        $("nextBtn").disabled = false;
+        $("feedback").innerHTML = "<span class='text-yellow-400 font-bold uppercase'>All trash processed. Analyze the journey next!</span>";
+      }
+    }
 
-            document.getElementById('emissions-value').textContent = totalExtraEmissions > 0
-                ? `+${totalExtraEmissions.toFixed(1)} tCO₂e (due to poor sorting)`
-                : '+0 tCO₂e (good sorting!)';
+    function updateUI() {
+      $("contamination").textContent = contamination + "%";
+      $("meter-bar").style.width = contamination + "%";
+      $("emissions-value").textContent = `+${totalExtraEmissions.toFixed(1)} tCO₂e extra emissions`;
+    }
 
-            sortedItems.push({ item, binId, isCorrect });
+    $("nextBtn").onclick = () => {
+      $("sorting-section").classList.add("hidden");
+      $("journey-section").classList.remove("hidden");
+      $("contam-level").textContent = contamination + "%";
 
-            if (itemsLeft === 0) document.getElementById('nextBtn').disabled = false;
-        }
+      const list = $("outcome-list");
+      list.innerHTML = sortedItems.map(s => `
+        <li class="flex justify-between items-center p-4 border-b border-white/5 last:border-0">
+          <div class="flex items-center gap-4"><span class="text-3xl">${s.item.icon}</span> <span>${s.item.name} → ${s.binId}</span></div>
+          <span class="font-bold ${s.isCorrect ? 'text-emerald-400' : 'text-red-400'}">${s.isCorrect ? '✓ Clean' : '+' + s.item.emissions + ' tCO₂e'}</span>
+        </li>
+      `).join("");
 
-        function simulateTransport() {
-            const result = document.getElementById('transport-result');
-            const level = document.getElementById('contam-level').textContent = contamination + '%';
+      $("total-emissions").textContent = `Total Extra: +${totalExtraEmissions.toFixed(1)} tCO₂e`;
+    };
 
-            if (contamination > 30) {
-                result.innerHTML = 'Heavy mixed load → inefficient route & possible extra trips<br>+0.8 tCO₂e extra from transport fuel';
-                result.style.color = '#f44336';
-                totalExtraEmissions += 0.8;
-            } else {
-                result.innerHTML = 'Separated loads → optimized route & dedicated vehicles<br>+0.2 tCO₂e only';
-                result.style.color = '#4caf50';
-                totalExtraEmissions += 0.2;
-            }
+    function simulateTransport() {
+      const tr = $("transport-result");
+      const dr = $("disposal-result");
+      if (contamination > 30) {
+        tr.innerHTML = "<p class='text-red-400 font-bold'>Inefficient Route</p><p>Extra haulage required due to contamination weight and rejection. <span class='text-white'>+0.8 tCO₂e</span></p>";
+        dr.innerHTML = "<p class='text-red-400 font-bold'>Load Rejected</p><p>Sent to incinerator. Recycling not possible.</p>";
+        totalExtraEmissions += 3.3;
+      } else {
+        tr.innerHTML = "<p class='text-emerald-400 font-bold'>Optimized Route</p><p>Direct to processing facility. <span class='text-white'>+0.2 tCO₂e</span></p>";
+        dr.innerHTML = "<p class='text-emerald-400 font-bold'>Accepted</p><p>Materials sent for circular recovery.</p>";
+        $("facility-icon").textContent = "♻️";
+        $("facility-label").textContent = "Recycling Plant";
+      }
+      $("total-emissions").textContent = `Total Extra: +${totalExtraEmissions.toFixed(1)} tCO₂e`;
+    }
 
-            updateTotalEmissions();
-            simulateDisposal();  // Auto-trigger disposal after transport
-        }
+    function showImprovements() {
+      $("journey-section").classList.add("hidden");
+      $("improvements-section").classList.remove("hidden");
+    }
 
-        function simulateDisposal() {
-            const disp = document.getElementById('disposal-result');
-            if (contamination > 30) {
-                disp.innerHTML = 'Load rejected (high contamination) → Forced to Incinerator<br>+2.5 tCO₂e (high treatment emissions)';
-                disp.style.color = '#f44336';
-                totalExtraEmissions += 2.5;
-                document.getElementById('facility-icon').textContent = '🔥';
-                document.getElementById('facility-label').textContent = 'Incinerator';
-            } else {
-                disp.innerHTML = 'Accepted → Recycling / Composting<br>Avoided emissions (net savings)';
-                disp.style.color = '#4caf50';
-                totalExtraEmissions -= 1.0;  // Simulated savings
-                document.getElementById('facility-icon').textContent = '♻️';
-                document.getElementById('facility-label').textContent = 'Recycling/Compost Plant';
-            }
-            updateTotalEmissions();
-        }
+    function applyImprovements() {
+      const el = $("reduction-display");
+      el.classList.replace("opacity-0", "opacity-100");
+      el.classList.replace("scale-75", "scale-100");
+    }
 
-        function updateTotalEmissions() {
-            document.getElementById('total-emissions').textContent = totalExtraEmissions > 0
-                ? `+${totalExtraEmissions.toFixed(1)} tCO₂e (full chain impact)`
-                : 'Net savings achieved!';
-        }
-
-        function nextScene() {
-            document.getElementById('sorting-section').style.display = 'none';
-            document.getElementById('journey-section').style.display = 'block';
-
-            const list = document.getElementById('outcome-list');
-            list.innerHTML = '';
-            sortedItems.forEach(entry => {
-                const li = document.createElement('li');
-                const icon = entry.isCorrect ? '✅' : '❌';
-                const text = entry.isCorrect ? '' : `(+${entry.item.emissions} tCO₂e)`;
-                li.innerHTML = `${icon} ${entry.item.name} → ${entry.binId.toUpperCase()} ${text}`;
-                list.appendChild(li);
-            });
-
-            updateTotalEmissions();
-            document.getElementById('contam-level').textContent = contamination + '%';
-        }
-
-        function showImprovements() {
-            document.getElementById('journey-section').style.display = 'none';
-            document.getElementById('improvements-section').style.display = 'block';
-        }
-
-        function applyImprovements() {
-            contamination = 10;
-            totalExtraEmissions = -205;  // Medium scenario net reduction
-            document.getElementById('reduction-display').style.opacity = 1;
-            document.getElementById('reduction-display').classList.add('applied');
-            alert('Changes applied! Contamination now 10% → Net -205 tCO₂e (medium scenario)');
-        }
-
-        function resetSimulation() {
-            sortedItems = [];
-            contamination = 0;
-            totalExtraEmissions = 0;
-            itemsLeft = wasteItems.length;
-            document.getElementById('nextBtn').disabled = true;
-            document.getElementById('meter-bar').style.width = '0%';
-            document.getElementById('contamination').textContent = '0%';
-            document.getElementById('emissions-value').textContent = '+0 tCO₂e (no extra emissions yet)';
-            document.getElementById('feedback').innerHTML = '';
-            document.getElementById('transport-result').innerHTML = '';
-            document.getElementById('disposal-result').innerHTML = '';
-            document.getElementById('total-emissions').textContent = '+0 tCO₂e';
-            document.getElementById('reduction-display').style.opacity = 0;
-            populateItems();
-            populateBins();
-            document.getElementById('sorting-section').style.display = 'block';
-            document.getElementById('journey-section').style.display = 'none';
-            document.getElementById('improvements-section').style.display = 'none';
-        }
-
-        function restartSimulation() { location.reload(); }
-
-        window.onload = function() {
-            populateItems();
-            populateBins();
-        };
-    </script>
+    // Initialize
+    window.onload = () => {
+      populateItems();
+      populateBins();
+    }
+  </script>
 </body>
 </html>
