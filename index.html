@@ -1,372 +1,320 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Waste CSI: Follow the Trash</title>
+  <title>Sustainability Impact Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-start: #060d0c;
-      --bg-end: #0f1f1c;
-      --card: rgba(15, 30, 28, 0.9);
-      --border: rgba(52, 211, 153, 0.2);
-      --green: #34d399;
-      --red: #f87171;
-      --yellow: #fbbf24;
+      --brand-green: #143028;
+      --mint: #34d399;
+      --light-mint: #ecfdf5;
     }
     body {
-      background: radial-gradient(circle at center, var(--bg-end), var(--bg-start));
-      color: #f3f4f6;
-      font-family: 'Inter', system-ui, sans-serif;
+      background-color: var(--brand-green);
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
     .glass-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    }
-    .item-box {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 28px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      cursor: grab;
-      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
     }
-    .item-box:hover {
-      background: rgba(255, 255, 255, 0.08);
-      transform: translateY(-3px);
-      border-color: var(--green);
-    }
-    .bin-box {
+    
+    /* SCENE 1 STYLES */
+    .bin-target {
+      background: rgba(0, 0, 0, 0.2);
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      padding: 35px 15px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border-width: 2px;
     }
-    .bin-box.drag-over {
-      transform: scale(1.05);
-      background: rgba(52, 211, 153, 0.1) !important;
-      border-color: var(--green) !important;
+    .bin-target.active { border-color: var(--mint); background: rgba(52, 211, 153, 0.1); transform: scale(1.02); }
+    .signage-label { display: none; background: #fbbf24; color: #000; font-size: 10px; padding: 3px 10px; border-radius: 6px; margin-bottom: 8px; font-weight: 900; }
+
+    /* SCENE 2: UPGRADED TRANSPORTATION VISUALS */
+    .road-container {
+      background: linear-gradient(90deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      height: 120px;
+      border-radius: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
     }
-    .progress-fill {
-      transition: width 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+    .road-container::before {
+      content: "";
+      position: absolute;
+      top: 50%; left: 0; right: 0; height: 2px;
+      background: repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.1) 20px, rgba(255,255,255,0.1) 40px);
     }
-    .btn-action {
-      background: linear-gradient(135deg, #10b981, #059669);
-      transition: all 0.3s;
+    #truck {
+      position: absolute; left: 0; font-size: 45px; z-index: 10;
+      transition: all 2.5s cubic-bezier(0.45, 0.05, 0.55, 0.95);
     }
-    .btn-action:hover:not(:disabled) {
-      filter: brightness(1.1);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);
+    .truck-glow {
+      position: absolute; width: 60px; height: 60px;
+      background: radial-gradient(circle, rgba(52, 211, 153, 0.3) 0%, transparent 70%);
+      border-radius: 50%; animation: pulse 2s infinite; top: 0; left: -5px;
     }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.4); opacity: 0.2; }
+      100% { transform: scale(1); opacity: 0.6; }
+    }
+    .scan-trigger {
+      width: 130px; height: 130px; border-radius: 50%;
+      background: radial-gradient(circle at center, #34d399 0%, #065f46 100%);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-weight: 800; text-align: center; font-size: 13px;
+      line-height: 1.2; user-select: none; transition: transform 0.2s;
+      z-index: 5;
+    }
+    .scan-progress-ring { stroke-dasharray: 440; stroke-dashoffset: 440; transition: stroke-dashoffset 0.1s linear; }
+
+    /* SCENE 3 STYLES */
+    .strategy-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px; padding: 24px;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .strategy-card:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-5px); }
+    .strategy-card.selected { border-color: var(--mint); background: rgba(52, 211, 153, 0.1); }
+    .status-badge { padding: 6px 16px; border-radius: 99px; font-size: 11px; font-weight: 800; text-transform: uppercase; border: 1px solid transparent; }
+    .fail { background: #451a1a; color: #ff8080; border-color: #7f1d1d; }
+    .success { background: #064e3b; color: #6ee7b7; border-color: #065f46; }
   </style>
 </head>
-<body class="min-h-screen p-6">
-  <div class="max-w-6xl mx-auto space-y-12">
-
-    <header class="text-center py-10">
-      <h1 class="text-6xl font-black tracking-tighter mb-4 text-white">Waste CSI: <span class="text-emerald-500">Follow the Trash</span></h1>
-      <p class="text-xl text-gray-400">Investigating Scope 3 emissions at ISS</p>
+<body class="p-6 md:p-12">
+  <div class="max-w-6xl mx-auto">
+    
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+      <div>
+        <h1 class="text-4xl font-800 italic text-emerald-400 tracking-tighter">WASTE CSI: AUDIT PORTAL</h1>
+        <p class="text-slate-400 font-medium text-sm">Systemic Improvement & Operational Analysis</p>
+      </div>
+      <div id="portal-status" class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">Status: Ready for Audit</div>
     </header>
 
-    <section id="sorting-section" class="glass-card p-10">
-      <div class="flex items-center gap-4 mb-8">
-        <span class="text-3xl">🔍</span>
-        <h2 class="text-3xl font-bold">Scene 1: The Waste Bin at Site</h2>
-      </div>
-
-      <div class="flex gap-4 mb-10">
-        <button onclick="toggleBinStyle('old')" class="px-6 py-3 rounded-xl bg-gray-800 font-bold hover:bg-gray-700 transition">Old Inconsistent Bins</button>
-        <button onclick="toggleBinStyle('standard')" class="px-6 py-3 rounded-xl bg-emerald-900/50 border border-emerald-500/50 font-bold hover:bg-emerald-800 transition">Standardised Bins</button>
-      </div>
-
-      <div class="bg-black/40 rounded-3xl p-8 mb-10 border border-white/5">
-        <h3 class="text-xs uppercase font-black text-emerald-500 tracking-widest mb-6">🗑️ ISS Mixed Waste Bin (Unsorted)</h3>
-        <div id="items" class="flex flex-wrap gap-4 justify-center min-h-[120px]">
-          </div>
-      </div>
-
-      <div id="bins" class="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10">
+    <section id="scene-1" class="glass-card p-8 md:p-10">
+      <div class="flex flex-col lg:flex-row justify-between mb-10 gap-6">
+        <div>
+          <h2 class="text-2xl font-bold">Phase I: Source Segregation</h2>
+          <p class="text-slate-400 text-sm">Organize site waste to verify behavior patterns.</p>
         </div>
-
-      <button onclick="activateSignage()" class="flex items-center gap-3 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition mb-8 font-bold">
-        <span>🖼️</span> Activate Signage
-      </button>
-
-      <div id="feedback" class="p-6 bg-black/20 rounded-2xl text-center text-xl font-medium min-h-[80px] border border-white/5 text-gray-400 italic flex items-center justify-center">
-        Analyze the trash and drag items to the correct bin...
-      </div>
-
-      <div class="mt-12 space-y-6">
-        <div class="flex justify-between font-bold text-xl">
-          <span>Contamination Level: <span id="contamination" class="text-emerald-400">0%</span></span>
-          <span id="emissions-value" class="text-gray-400">+0 tCO₂e extra emissions</span>
-        </div>
-        <div class="h-4 bg-black/50 rounded-full overflow-hidden border border-white/10">
-          <div id="meter-bar" class="progress-fill w-0 h-full bg-gradient-to-r from-emerald-500 via-yellow-500 to-red-500"></div>
+        <div class="flex flex-wrap gap-3">
+            <button onclick="activateSignage()" class="bg-slate-100/10 hover:bg-white/20 px-5 py-2.5 rounded-xl text-xs font-bold border border-white/10 transition">ADD SIGNAGE</button>
+            <button onclick="standardize()" class="bg-slate-100/10 hover:bg-white/20 px-5 py-2.5 rounded-xl text-xs font-bold border border-white/10 transition">STANDARDISE</button>
+            <button onclick="eduMode()" class="bg-emerald-500 text-black px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/20 transition">STAFF EDUCATION</button>
         </div>
       </div>
-
-      <div class="flex justify-center gap-6 mt-16">
-        <button id="nextBtn" disabled class="btn-action px-12 py-5 rounded-2xl text-2xl font-black text-white disabled:opacity-20 uppercase tracking-widest">
-          Follow the Trash →
-        </button>
-        <button onclick="location.reload()" class="px-10 py-5 bg-gray-800 rounded-2xl text-2xl font-bold hover:bg-gray-700 transition">Reset</button>
+      <div id="items" class="flex flex-wrap gap-4 justify-center min-h-[100px] mb-12 p-8 bg-black/20 rounded-3xl border border-white/5"></div>
+      <div id="bins" class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"></div>
+      <div class="flex flex-col md:flex-row items-center justify-between pt-10 border-t border-white/10 gap-10">
+        <div class="w-full md:w-1/2">
+            <div class="flex justify-between mb-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <span>Sorting Accuracy</span>
+                <span id="acc-text">100%</span>
+            </div>
+            <div class="h-2.5 bg-white/5 rounded-full overflow-hidden"><div id="acc-bar" class="w-full h-full bg-emerald-400 transition-all duration-1000"></div></div>
+        </div>
+        <button id="nextBtn" disabled onclick="showScene(2)" class="bg-white text-black px-12 py-5 rounded-2xl font-800 text-sm uppercase tracking-widest hover:bg-emerald-400 transition-all disabled:opacity-10">Dispatch Load →</button>
       </div>
     </section>
 
-    <section id="journey-section" class="hidden glass-card p-10">
-      <h2 class="text-4xl font-black mb-10 flex items-center gap-4"><span>🚚</span> Scene 2: Journey Analysis</h2>
-      
-      <div class="flex flex-wrap justify-center gap-12 items-center p-12 bg-black/30 rounded-3xl border border-white/5 mb-12">
-        <div class="text-center"><div class="text-8xl mb-2">🗑️</div><p class="font-black text-gray-500">BIN</p></div>
-        <div class="text-4xl text-yellow-500">→</div>
-        <div class="text-center"><div class="text-8xl mb-2">🚚</div><p class="font-black text-gray-500">TRUCK</p></div>
-        <div class="text-4xl text-yellow-500">→</div>
-        <div class="text-center"><div id="facility-icon" class="text-8xl mb-2">🔥</div><p id="facility-label" class="font-black text-gray-500 uppercase">Facility</p></div>
+    <section id="scene-2" class="hidden glass-card p-10">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold italic">Phase II: Gateway Inspection & Logistics</h2>
+        <div class="text-[10px] font-bold text-emerald-400 animate-pulse uppercase tracking-widest bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20">Live Telemetry</div>
       </div>
 
+      <div class="road-container mb-12">
+        <div id="truck"><div class="truck-glow"></div>🚛</div>
+        <div class="flex justify-between w-full relative px-4">
+          <div class="text-center"><div class="w-2 h-2 bg-white rounded-full mx-auto mb-1"></div><p class="text-[8px] font-bold text-slate-500">FACILITY</p></div>
+          <div class="text-center"><div class="w-3 h-3 bg-emerald-400 rounded-full mx-auto mb-1 shadow-[0_0_10px_#34d399]"></div><p class="text-[8px] font-bold text-emerald-400">GATEWAY</p></div>
+          <div class="text-center"><div class="w-2 h-2 bg-white rounded-full mx-auto mb-1 opacity-30"></div><p class="text-[8px] font-bold text-slate-500">DESTINATION</p></div>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-8">
+        <div class="glass-card p-8 flex flex-col items-center justify-center bg-black/30">
+            <div class="relative">
+                <svg class="w-36 h-36 transform -rotate-90">
+                    <circle cx="72" cy="72" r="70" stroke="rgba(255,255,255,0.05)" stroke-width="6" fill="transparent" />
+                    <circle id="scan-ring" cx="72" cy="72" r="70" stroke="#34d399" stroke-width="6" fill="transparent" class="scan-progress-ring" />
+                </svg>
+                <div onmousedown="startScan()" onmouseup="stopScan()" onmouseleave="stopScan()" class="scan-trigger absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">HOLD TO<br>ANALYZE</div>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-6 font-bold uppercase tracking-tighter">Purity Validation Gate</p>
+        </div>
+        <div class="lg:col-span-2 space-y-4">
+            <div id="log-feed" class="p-6 bg-black/40 rounded-2xl min-h-[140px] border border-white/5 font-mono text-xs text-emerald-500/80 italic">
+                > Awaiting shipment arrival...
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-6 bg-white/5 rounded-2xl border border-white/5">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Fuel Penalty</p>
+                    <p class="text-4xl font-800 text-white"><span id="fuel-val">0.00</span> <span class="text-xs opacity-40">tCO2e</span></p>
+                </div>
+                <div class="p-6 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-center">
+                    <div id="status-pill" class="status-badge hidden">PENDING</div>
+                </div>
+            </div>
+        </div>
+      </div>
+      <div class="mt-12 flex justify-center">
+        <button id="to-scene-3" disabled onclick="showScene(3)" class="bg-white text-black px-14 py-5 rounded-2xl font-800 text-sm uppercase tracking-widest">Generate Impact Report →</button>
+      </div>
+    </section>
+
+    <section id="scene-3" class="hidden">
+      <div class="text-center mb-12">
+        <h2 class="text-5xl font-800 tracking-tighter mb-4 italic">Impact of Better Practices</h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-sm">Activate the proposed strategies below to visualize the medium-scenario savings for Idea 3.</p>
+      </div>
       <div class="grid md:grid-cols-2 gap-8 mb-12">
-        <div class="p-8 bg-black/40 rounded-2xl border border-white/5">
-          <h3 class="text-2xl font-bold mb-4 text-yellow-500">Transport Investigation</h3>
-          <p class="text-lg mb-6 text-gray-400">Current Contamination: <span id="contam-level" class="text-white font-bold">0%</span></p>
-          <button onclick="simulateTransport()" class="w-full py-4 bg-yellow-600 font-black rounded-xl hover:bg-yellow-500 transition uppercase tracking-widest">Simulate Journey</button>
-          <div id="transport-result" class="mt-6 text-lg min-h-[120px]"></div>
+        <div class="glass-card p-12 text-center bg-gradient-to-br from-emerald-900/30 to-black/50 border-emerald-500/20">
+            <p class="text-8xl font-800 text-emerald-400 tracking-tighter">-<span id="final-co2">0</span></p>
+            <p class="text-xl font-bold mt-4">tCO2e Reduced Annually</p>
+            <p class="text-xs text-emerald-500/60 mt-4 font-medium uppercase tracking-widest">Equivalent to 44 cars off the road</p>
         </div>
-        <div class="p-8 bg-black/40 rounded-2xl border border-white/5">
-          <h3 class="text-2xl font-bold mb-4 text-emerald-500">Final Disposal</h3>
-          <div id="disposal-result" class="text-lg min-h-[120px]">Waiting for simulation...</div>
+        <div class="glass-card p-12 text-center bg-gradient-to-br from-blue-900/30 to-black/50 border-blue-500/20">
+            <p class="text-8xl font-800 text-blue-400 tracking-tighter"><span id="final-rate">35</span>%</p>
+            <p class="text-xl font-bold mt-4">Target Contamination Rate</p>
+            <p class="text-xs text-blue-500/60 mt-4 font-medium uppercase tracking-widest">Industry standard: 35%</p>
         </div>
       </div>
-
-      <div class="p-8 bg-black/20 rounded-2xl mb-12">
-        <h3 class="text-xl font-bold mb-6 text-gray-500 uppercase tracking-widest">Sorting Report</h3>
-        <ul id="outcome-list" class="space-y-4"></ul>
+      <div class="grid md:grid-cols-4 gap-4">
+        <div onclick="toggleStrategy(this, 51, 6)" class="strategy-card">
+            <div class="text-2xl mb-4">📋</div>
+            <h4 class="font-bold text-sm mb-2 text-white">Bin Standardisation</h4>
+            <p class="text-[10px] text-slate-400 leading-relaxed">Uniform colors across facilities reduce user confusion.</p>
+        </div>
+        <div onclick="toggleStrategy(this, 51, 6)" class="strategy-card">
+            <div class="text-2xl mb-4">📢</div>
+            <h4 class="font-bold text-sm mb-2 text-white">Better Signage</h4>
+            <p class="text-[10px] text-slate-400 leading-relaxed">Clear 'Yes/No' visual cues directly at disposal.</p>
+        </div>
+        <div onclick="toggleStrategy(this, 52, 6)" class="strategy-card">
+            <div class="text-2xl mb-4">🌿</div>
+            <h4 class="font-bold text-sm mb-2 text-white">Composting Pilot</h4>
+            <p class="text-[10px] text-slate-400 leading-relaxed">Diverting organics prevents methane release.</p>
+        </div>
+        <div onclick="toggleStrategy(this, 51, 7)" class="strategy-card">
+            <div class="text-2xl mb-4">📊</div>
+            <h4 class="font-bold text-sm mb-2 text-white">Regular Audits</h4>
+            <p class="text-[10px] text-slate-400 leading-relaxed">Accountability through monthly stream checks.</p>
+        </div>
       </div>
-
-      <div class="text-center">
-        <div id="total-emissions" class="text-5xl font-black mb-12">Total Extra: +0 tCO₂e</div>
-        <button onclick="showImprovements()" class="btn-action px-12 py-6 rounded-2xl text-2xl font-black text-white uppercase tracking-widest">See After Improvements →</button>
-      </div>
+      <div class="mt-16 text-center"><button onclick="location.reload()" class="text-slate-500 hover:text-white text-[10px] font-bold uppercase tracking-[0.4em] transition">Restart Audit Simulation</button></div>
     </section>
-
-    <section id="improvements-section" class="hidden space-y-12">
-      <div class="text-center">
-        <h2 class="text-6xl font-black text-emerald-400 mb-4">Impact of Better Practices</h2>
-        <p class="text-xl text-gray-400">Transforming the waste stream into a carbon asset.</p>
-      </div>
-
-      <div class="grid md:grid-cols-2 gap-8">
-        <div class="glass-card p-12 text-center">
-          <div id="reduction-display" class="text-9xl font-black text-emerald-500 opacity-0 transition-all duration-1000 scale-75">-205</div>
-          <p class="text-2xl font-bold mt-4 uppercase">tCO₂e Reduced Annually</p>
-        </div>
-        <div class="glass-card p-12 text-center">
-          <div class="text-9xl font-black text-white">10%</div>
-          <p class="text-2xl font-bold mt-4 uppercase">Target Contamination Rate</p>
-        </div>
-      </div>
-
-      <div class="text-center">
-        <button onclick="applyImprovements()" class="btn-action px-16 py-8 rounded-2xl text-3xl font-black text-white uppercase">Apply Changes & Show Impact</button>
-      </div>
-
-      <div class="grid md:grid-cols-4 gap-6">
-        <div class="glass-card p-6 text-center bg-emerald-500/5">
-          <div class="text-4xl mb-3">📍</div>
-          <h4 class="font-bold mb-2">Bin Standardisation</h4>
-          <p class="text-xs text-gray-500">Uniform systems across sites.</p>
-        </div>
-        <div class="glass-card p-6 text-center bg-emerald-500/5">
-          <div class="text-4xl mb-3">🖼️</div>
-          <h4 class="font-bold mb-2">Better Signage</h4>
-          <p class="text-xs text-gray-500">Visual sorting guides.</p>
-        </div>
-        <div class="glass-card p-6 text-center bg-emerald-500/5">
-          <div class="text-4xl mb-3">🍎</div>
-          <h4 class="font-bold mb-2">Food Separation</h4>
-          <p class="text-xs text-gray-500">Preventing organic methane.</p>
-        </div>
-        <div class="glass-card p-6 text-center bg-emerald-500/5">
-          <div class="text-4xl mb-3">📋</div>
-          <h4 class="font-bold mb-2">Monthly Audits</h4>
-          <p class="text-xs text-gray-500">KPI tracking and fixes.</p>
-        </div>
-      </div>
-    </section>
-
   </div>
 
   <script>
-    // YOUR ORIGINAL DATA
-    const wasteItems = [
-      { id: 1, name: "Food Scrap", icon: "🍎", emissions: 1.8, correctBin: "compost" },
-      { id: 2, name: "Plastic Bottle", icon: "🛍️", emissions: 0.9, correctBin: "recycling" },
-      { id: 3, name: "Paper Cup", icon: "📄", emissions: 0.4, correctBin: "recycling" },
-      { id: 4, name: "Contaminated Mixed", icon: "🗑️", emissions: 3.2, correctBin: "general" },
+    const items = [
+      { id: 1, name: "Food Scraps", icon: "🍎", bin: "compost" },
+      { id: 2, name: "Soda Can", icon: "🥤", bin: "recycling" },
+      { id: 3, name: "Coffee Cup", icon: "☕", bin: "general" }
     ];
-
     const bins = [
-      { id: "compost", name: "Compost 🌱" },
-      { id: "recycling", name: "Recycling ♻️" },
-      { id: "general", name: "General 🔥" },
+      { id: "compost", name: "Organics", color: "#064e3b", tips: "Food & Organic matter" },
+      { id: "recycling", name: "Recycling", color: "#1e3a8a", tips: "Clean Plastics & Cans" },
+      { id: "general", name: "General Waste", color: "#334155", tips: "Non-recyclable items" }
     ];
+    let contamination = 0, sorted = 0, scanProgress = 0, eduActive = false;
+    let savedCO2 = 0, currentRate = 35;
 
-    let sortedItems = [];
-    let contamination = 0;
-    let totalExtraEmissions = 0;
-    let itemsLeft = wasteItems.length;
-    let binStyle = "old";
-    let signageActive = false;
-
-    function $(id) { return document.getElementById(id); }
-
-    function populateItems() {
-      const cont = $("items");
-      cont.innerHTML = "";
-      wasteItems.forEach(item => {
-        const el = document.createElement("div");
-        el.className = "item-box px-8 py-5 rounded-2xl flex items-center gap-4 text-xl font-bold shadow-xl border border-white/10";
-        el.draggable = true;
-        el.dataset.id = item.id;
-        el.innerHTML = `<span class="text-4xl">${item.icon}</span> ${item.name}`;
-        el.addEventListener("dragstart", e => e.dataTransfer.setData("text/plain", item.id));
-        cont.appendChild(el);
+    function init() {
+      const itemCont = document.getElementById('items');
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = "bg-white text-black px-5 py-3 rounded-xl font-bold cursor-grab shadow-lg flex items-center gap-3";
+        div.draggable = true;
+        div.innerHTML = `<span>${item.icon}</span> ${item.name}`;
+        div.addEventListener('dragstart', (e) => e.dataTransfer.setData('text', item.id));
+        itemCont.appendChild(div);
       });
-    }
-
-    function populateBins() {
-      const cont = $("bins");
-      cont.innerHTML = "";
+      const binCont = document.getElementById('bins');
       bins.forEach(bin => {
-        const el = document.createElement("div");
-        el.className = "bin-box p-12 rounded-3xl bg-black/40 text-center shadow-xl text-7xl font-bold border border-white/5";
-        el.dataset.id = bin.id;
-        el.innerHTML = bin.name.split(" ")[1] || "♻️";
-        
-        if (binStyle === "old") {
-          el.style.backgroundColor = `hsl(${Math.random() * 360}, 20%, 20%)`;
-        } else {
-          el.style.borderColor = "rgba(16, 185, 129, 0.3)";
-          el.style.backgroundColor = "rgba(16, 185, 129, 0.05)";
-        }
-
-        el.addEventListener("dragover", e => {
-          e.preventDefault();
-          el.classList.add("drag-over");
-        });
-        el.addEventListener("dragleave", () => el.classList.remove("drag-over"));
-        el.addEventListener("drop", drop);
-        cont.appendChild(el);
+        const div = document.createElement('div');
+        div.className = "bin-target text-center";
+        div.dataset.id = bin.id;
+        div.innerHTML = `<div class="signage-label">GUIDE: ${bin.tips}</div><div class="text-5xl mb-5 opacity-20">${bin.id === 'compost' ? '🌿' : bin.id === 'recycling' ? '♻️' : '🗑️'}</div><div class="font-bold text-[10px] uppercase text-slate-500 tracking-widest">${bin.name}</div>`;
+        div.addEventListener('dragover', (e) => { e.preventDefault(); div.classList.add('active'); });
+        div.addEventListener('dragleave', () => div.classList.remove('active'));
+        div.addEventListener('drop', (e) => handleDrop(e, bin.id));
+        binCont.appendChild(div);
       });
     }
 
-    function toggleBinStyle(style) {
-      binStyle = style;
-      populateBins();
-      if (style === "standard") {
-        contamination = Math.max(0, contamination - 10);
-        updateUI();
-      }
-    }
+    function eduMode() { eduActive = true; alert("Staff Education Deployed."); }
+    function activateSignage() { document.querySelectorAll('.signage-label').forEach(s => s.style.display = 'block'); }
+    function standardize() { document.querySelectorAll('.bin-target').forEach((el, i) => { el.style.backgroundColor = bins[i].color; el.style.borderStyle = "solid"; el.style.borderColor = "white"; el.querySelector('.opacity-20').style.opacity = "1"; }); }
 
-    function activateSignage() {
-      signageActive = true;
-      contamination = Math.max(0, contamination - 10);
-      updateUI();
-      $("feedback").innerHTML = "<span class='text-emerald-400 font-bold'>Signage Active: Sorting intelligence increased!</span>";
-    }
-
-    function drop(e) {
+    function handleDrop(e, binId) {
       e.preventDefault();
-      const binEl = e.currentTarget;
-      binEl.classList.remove("drag-over");
-      
-      const id = parseInt(e.dataTransfer.getData("text/plain"));
-      const item = wasteItems.find(i => i.id === id);
-      const binId = binEl.dataset.id;
-      
-      let isCorrect = item.correctBin === binId;
-      if (signageActive && !isCorrect) {
-        isCorrect = Math.random() > 0.5;
-      }
-
-      document.querySelector(`[data-id="${id}"]`)?.remove();
-      itemsLeft--;
-
-      if (isCorrect) {
-        binEl.style.borderColor = "#34d399";
-        $("feedback").innerHTML = `<span class='text-emerald-400 font-bold'>Correct!</span> ${item.name} is handled properly.`;
-      } else {
-        binEl.style.borderColor = "#f87171";
-        contamination = Math.min(100, contamination + 25);
-        totalExtraEmissions += item.emissions;
-        $("feedback").innerHTML = `<span class='text-red-400 font-bold'>Wrong!</span> ${item.name} contaminated the ${binId} bin.`;
-      }
-
-      sortedItems.push({ item, binId, isCorrect });
-      updateUI();
-
-      if (itemsLeft <= 0) {
-        $("nextBtn").disabled = false;
-        $("feedback").innerHTML = "<span class='text-yellow-400 font-bold uppercase'>All trash processed. Analyze the journey next!</span>";
-      }
+      const id = e.dataTransfer.getData('text'), item = items.find(i => i.id == id);
+      document.querySelectorAll('#items div').forEach(el => { if(el.innerText.includes(item.name)) el.remove(); });
+      let errorCost = eduActive ? 15 : 33;
+      if (item.bin !== binId) contamination += errorCost;
+      sorted++;
+      const acc = Math.max(100 - contamination, 0);
+      document.getElementById('acc-text').innerText = acc + "%";
+      document.getElementById('acc-bar').style.width = acc + "%";
+      if (sorted === items.length) document.getElementById('nextBtn').disabled = false;
     }
 
-    function updateUI() {
-      $("contamination").textContent = contamination + "%";
-      $("meter-bar").style.width = contamination + "%";
-      $("emissions-value").textContent = `+${totalExtraEmissions.toFixed(1)} tCO₂e extra emissions`;
+    function showScene(n) { document.querySelectorAll('section').forEach(s => s.classList.add('hidden')); document.getElementById(`scene-${n}`).classList.remove('hidden'); window.scrollTo(0,0); }
+
+    let scanTimer;
+    function startScan() {
+      document.getElementById('truck').style.left = "45%";
+      const ring = document.getElementById('scan-ring');
+      scanTimer = setInterval(() => {
+        scanProgress += 2;
+        ring.style.strokeDashoffset = 440 - (scanProgress / 100) * 440;
+        if (scanProgress >= 100) { clearInterval(scanTimer); finishAudit(); }
+      }, 30);
     }
+    function stopScan() { if (scanProgress < 100) { clearInterval(scanTimer); scanProgress = 0; document.getElementById('scan-ring').style.strokeDashoffset = 440; } }
 
-    $("nextBtn").onclick = () => {
-      $("sorting-section").classList.add("hidden");
-      $("journey-section").classList.remove("hidden");
-      $("contam-level").textContent = contamination + "%";
-
-      const list = $("outcome-list");
-      list.innerHTML = sortedItems.map(s => `
-        <li class="flex justify-between items-center p-4 border-b border-white/5 last:border-0">
-          <div class="flex items-center gap-4"><span class="text-3xl">${s.item.icon}</span> <span>${s.item.name} → ${s.binId}</span></div>
-          <span class="font-bold ${s.isCorrect ? 'text-emerald-400' : 'text-red-400'}">${s.isCorrect ? '✓ Clean' : '+' + s.item.emissions + ' tCO₂e'}</span>
-        </li>
-      `).join("");
-
-      $("total-emissions").textContent = `Total Extra: +${totalExtraEmissions.toFixed(1)} tCO₂e`;
-    };
-
-    function simulateTransport() {
-      const tr = $("transport-result");
-      const dr = $("disposal-result");
+    function finishAudit() {
+      const log = document.getElementById('log-feed'), pill = document.getElementById('status-pill'), truck = document.getElementById('truck');
+      pill.classList.remove('hidden');
       if (contamination > 30) {
-        tr.innerHTML = "<p class='text-red-400 font-bold'>Inefficient Route</p><p>Extra haulage required due to contamination weight and rejection. <span class='text-white'>+0.8 tCO₂e</span></p>";
-        dr.innerHTML = "<p class='text-red-400 font-bold'>Load Rejected</p><p>Sent to incinerator. Recycling not possible.</p>";
-        totalExtraEmissions += 3.3;
+        log.innerHTML += `<p class="text-rose-400 mt-2 font-bold">> SCAN ERROR: Purity threshold failed.</p><p class="text-rose-400">> ACTION: Redirecting to Incineration (+12km transport).</p>`;
+        pill.innerText = "REJECTED"; pill.className = "status-badge fail shadow-[0_0_15px_#451a1a]";
+        truck.style.left = "90%"; truck.innerText = "🚛🔥";
+        document.getElementById('fuel-val').innerText = "0.80";
       } else {
-        tr.innerHTML = "<p class='text-emerald-400 font-bold'>Optimized Route</p><p>Direct to processing facility. <span class='text-white'>+0.2 tCO₂e</span></p>";
-        dr.innerHTML = "<p class='text-emerald-400 font-bold'>Accepted</p><p>Materials sent for circular recovery.</p>";
-        $("facility-icon").textContent = "♻️";
-        $("facility-label").textContent = "Recycling Plant";
+        log.innerHTML += `<p class="text-emerald-400 mt-2 font-bold">> SCAN SUCCESS: 94% purity verified.</p><p class="text-emerald-400">> ACTION: Route optimized for Anaerobic Digestion hub.</p>`;
+        pill.innerText = "PASSED"; pill.className = "status-badge success shadow-[0_0_15px_#064e3b]";
+        truck.style.left = "90%";
       }
-      $("total-emissions").textContent = `Total Extra: +${totalExtraEmissions.toFixed(1)} tCO₂e`;
+      document.getElementById('to-scene-3').disabled = false;
     }
 
-    function showImprovements() {
-      $("journey-section").classList.add("hidden");
-      $("improvements-section").classList.remove("hidden");
+    function toggleStrategy(card, co2Val, rateVal) {
+      if(card.classList.contains('selected')) return;
+      card.classList.add('selected');
+      let startCO2 = savedCO2, endCO2 = savedCO2 + co2Val;
+      let startRate = currentRate, endRate = currentRate - rateVal;
+      const interval = setInterval(() => {
+        if (savedCO2 < endCO2) { savedCO2++; document.getElementById('final-co2').innerText = savedCO2; }
+        if (currentRate > endRate) { currentRate--; document.getElementById('final-rate').innerText = currentRate; }
+        if (savedCO2 >= endCO2 && currentRate <= endRate) clearInterval(interval);
+      }, 15);
     }
 
-    function applyImprovements() {
-      const el = $("reduction-display");
-      el.classList.replace("opacity-0", "opacity-100");
-      el.classList.replace("scale-75", "scale-100");
-    }
-
-    // Initialize
-    window.onload = () => {
-      populateItems();
-      populateBins();
-    }
+    init();
   </script>
 </body>
 </html>
